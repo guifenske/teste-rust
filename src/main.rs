@@ -1,5 +1,10 @@
 use std::collections::HashMap;
 
+enum LoginStatus {
+  Success(String),
+  Error(String),
+}
+
 fn main() {
     let mut nome = String::from("Guilherme");
     let nome1 = &mut nome;
@@ -18,7 +23,7 @@ fn main() {
     println!("Ultima fruta vetor: {}", frutas2[frutas2.len() - 1]);
 
     //Tuple
-    let pessoa = (nome1, 19, true);
+    let pessoa = get_pessoa();
 
     println!("Nome: {}", pessoa.0);
     println!("Idade: {}", pessoa.1);
@@ -29,7 +34,59 @@ fn main() {
     cidadeCapital.insert("Rio Grande do Sul", "Porto Alegre");
     cidadeCapital.insert("Distrito Federal", "Brasilia");
 
-    println!("Capitadal do Distrito Federal: {}", cidadeCapital["Distrito Federal"]);
+    if let Some(cidade) = cidadeCapital.get("Distrito Federal") {
+        println!("Capitadal do Distrito Federal: {}", cidade);
+    }
+
+    let frutas3 = ["Pera", "Abacaxi", "Laranja"];
+
+    for fruta in frutas3 {
+        println!("Fruta: {}", fruta);
+    }
+
+    //ou
+
+    println!("{:?}", frutas3);
+
+    frutas2.pop(); //frutas2.remove(index);
+
+    for fruta in &frutas2 {
+        println!("Eu gosto de: {}", fruta);
+    }
+
+    println!("{:?}", frutas2);
+
+    for (estado, cidade) in &cidadeCapital {
+        println!("Capital do {} e {}", estado, cidade);
+    }
+
+    print!("{:?}", cidadeCapital);
+
+    struct Cidadao {
+        nome: String,
+        idade: u32 //sempre sera positivo
+    }
+
+    let mut guilherme = Cidadao {
+        nome: String::from("Guilherme Melo"),
+        idade: 18
+    };
+
+    guilherme.idade = 19;
+
+    println!("Nome: {}", guilherme.nome);
+    println!("Idade: {}", guilherme.idade);
+
+
+    //enum
+
+    let result1 = LoginStatus::Success(String::from("Welcome, {name}!"));
+    let result2 = LoginStatus::Error(String::from("Incorrect password"));
+
+    match result1 {
+        LoginStatus::Success(message) => println!("Success: {}", message),
+        LoginStatus::Error(message) => println!("Error: {}", message),
+    }
 
 }
 
@@ -46,3 +103,13 @@ fn soma(a: i32, b: i32) -> i32 {
     return a + b;
 }
 */
+
+fn get_pessoa() -> (String, i32, bool) {
+    (String::from("Guilherme"), 19, true)
+}
+
+
+//unsigned int nao permite valores negativos
+//o signed int permite valores negativos, e o bit mais importante
+//  (o primeiro), sempre sera 1 quando o nnumero for negativo.
+//  ex: em i4 0111 = 7, 1000 = -8, 1001 = -7
