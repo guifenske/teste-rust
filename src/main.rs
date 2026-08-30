@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 enum LoginStatus {
-  Success(String),
-  Error(String),
+    Success(String),
+    Error(String),
 }
 
 fn main() {
@@ -42,6 +42,8 @@ fn main() {
 
     for fruta in frutas3 {
         println!("Fruta: {}", fruta);
+
+        println!("Teste")
     }
 
     //ou
@@ -64,19 +66,18 @@ fn main() {
 
     struct Cidadao {
         nome: String,
-        idade: u32 //sempre sera positivo
+        idade: u32, //sempre sera positivo
     }
 
     let mut guilherme = Cidadao {
         nome: String::from("Guilherme Melo"),
-        idade: 18
+        idade: 18,
     };
 
     guilherme.idade = 19;
 
     println!("Nome: {}", guilherme.nome);
     println!("Idade: {}", guilherme.idade);
-
 
     //enum
 
@@ -87,19 +88,18 @@ fn main() {
         LoginStatus::Success(message) => println!("Success: {}", message),
         LoginStatus::Error(message) => println!("Error: {}", message),
     }
-
 }
 
-fn teste(name: &str){
+fn teste(name: &str) {
     println!("Hello {}!", name);
 }
 
-fn soma(a: i32, b: i32) -> i32 { 
+fn soma(a: i32, b: i32) -> i32 {
     a + b
 }
 
 /*
-fn soma(a: i32, b: i32) -> i32 { 
+fn soma(a: i32, b: i32) -> i32 {
     return a + b;
 }
 */
@@ -107,7 +107,6 @@ fn soma(a: i32, b: i32) -> i32 {
 fn get_pessoa() -> (String, i32, bool) {
     (String::from("Guilherme"), 19, true)
 }
-
 
 //unsigned int nao permite valores negativos
 //o signed int permite valores negativos, e o bit mais importante
