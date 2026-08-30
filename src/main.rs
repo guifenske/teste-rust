@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 enum LoginStatus {
     Success(String),
-    Error(String),
+    //Error(String),
 }
 
 fn main() {
@@ -30,11 +30,11 @@ fn main() {
     println!("Ativa: {}", pessoa.2);
 
     //HashMap
-    let mut cidadeCapital = HashMap::new();
-    cidadeCapital.insert("Rio Grande do Sul", "Porto Alegre");
-    cidadeCapital.insert("Distrito Federal", "Brasilia");
+    let mut cidade_capital = HashMap::new();
+    cidade_capital.insert("Rio Grande do Sul", "Porto Alegre");
+    cidade_capital.insert("Distrito Federal", "Brasilia");
 
-    if let Some(cidade) = cidadeCapital.get("Distrito Federal") {
+    if let Some(cidade) = cidade_capital.get("Distrito Federal") {
         println!("Capitadal do Distrito Federal: {}", cidade);
     }
 
@@ -58,11 +58,11 @@ fn main() {
 
     println!("{:?}", frutas2);
 
-    for (estado, cidade) in &cidadeCapital {
+    for (estado, cidade) in &cidade_capital {
         println!("Capital do {} e {}", estado, cidade);
     }
 
-    print!("{:?}", cidadeCapital);
+    print!("{:?}", cidade_capital);
 
     struct Cidadao {
         nome: String,
@@ -82,14 +82,14 @@ fn main() {
     //enum
 
     let result1 = LoginStatus::Success(String::from("Welcome, {name}!"));
-    let result2 = LoginStatus::Error(String::from("Incorrect password"));
 
     match result1 {
         LoginStatus::Success(message) => println!("Success: {}", message),
-        LoginStatus::Error(message) => println!("Error: {}", message),
+        //LoginStatus::Error(message) => println!("Error: {}", message),
     }
 }
 
+/*
 fn teste(name: &str) {
     println!("Hello {}!", name);
 }
@@ -98,7 +98,6 @@ fn soma(a: i32, b: i32) -> i32 {
     a + b
 }
 
-/*
 fn soma(a: i32, b: i32) -> i32 {
     return a + b;
 }
