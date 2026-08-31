@@ -36,5 +36,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo install cargo-tarpaulin
       - run: cargo tarpaulin --ignore-tests
