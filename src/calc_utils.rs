@@ -31,26 +31,11 @@ fn get_calculation(op: &str, a: &str, b: &str) -> Calculation {
 
 fn calculate(calc: &Calculation) -> f32 {
     match calc.op {
-        Operation::Add => {
-            let result = calc.a + calc.b;
-            result
-        }
-        Operation::Sub => {
-            let result = calc.a - calc.b;
-            result
-        }
-        Operation::Mul => {
-            let result = calc.a * calc.b;
-            result
-        }
-        Operation::Div => {
-            let result = calc.a / calc.b;
-            result
-        }
-        Operation::Pow => {
-            let result = calc.a.powf(calc.b);
-            result
-        }
+        Operation::Add => calc.a + calc.b,
+        Operation::Sub => calc.a - calc.b,
+        Operation::Mul => calc.a * calc.b,
+        Operation::Div => calc.a / calc.b,
+        Operation::Pow => calc.a.powf(calc.b),
     }
 }
 
@@ -71,7 +56,7 @@ pub fn init() {
             println!("Informe o número:");
             io::stdin().read_line(&mut a).unwrap();
 
-            calc = get_calculation(&op, &mut result.to_string(), &a);
+            calc = get_calculation(&op, &result.to_string(), &a);
             result = calculate(&calc);
         } else {
             println!("Informe o primeiro número:");
