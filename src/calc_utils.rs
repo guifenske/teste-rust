@@ -12,6 +12,7 @@ struct Calculation {
     op: Operation,
     a: f32,
     b: f32,
+    result: Option<f32>,
 }
 
 fn get_calculation(op: &str, a: &str, b: &str) -> Calculation {
@@ -26,7 +27,13 @@ fn get_calculation(op: &str, a: &str, b: &str) -> Calculation {
         "^" => Operation::Pow,
         _ => panic!("Operação inválida"),
     };
-    Calculation { op, a, b }
+
+    Calculation {
+        op,
+        a,
+        b,
+        result: None,
+    }
 }
 
 fn calculate(calc: &Calculation) -> f32 {
@@ -42,13 +49,14 @@ fn calculate(calc: &Calculation) -> f32 {
 pub fn init() {
     let mut result: f32 = 0.0;
     let mut should_continue = String::new();
+    let mut calculations: Vec<Calculation> = Vec::new();
     println!("Calculadora iniciou!");
 
     loop {
         let mut a = String::new();
         let mut b = String::new();
         let mut op = String::new();
-        let calc: Calculation;
+        let mut calc: Calculation;
         println!("Informe a operação (+, -, *, /):");
         io::stdin().read_line(&mut op).unwrap();
 
@@ -58,6 +66,8 @@ pub fn init() {
 
             calc = get_calculation(&op, &result.to_string(), &a);
             result = calculate(&calc);
+            calc.result = Some(result);
+            calculations.push(calc);
         } else {
             println!("Informe o primeiro número:");
             io::stdin().read_line(&mut a).unwrap();
@@ -67,11 +77,48 @@ pub fn init() {
 
             calc = get_calculation(&op, &a, &b);
             result = calculate(&calc);
+            calc.result = Some(result);
+            calculations.push(calc);
         }
 
         should_continue = String::new();
 
-        println!("Resultado da conta: {}", result);
+        println!("Calculo Atual: ");
+        let mut index = 0;
+        loop {
+            let calc: Option<&Calculation> = calculations.get(index);
+            let op: &str;
+
+            if calc.is_none() {
+                break;
+            }
+
+            match calc.unwrap().op {
+                Operation::Add => op = "+",
+                Operation::Sub => op = "-",
+                Operation::Mul => op = "*",
+                Operation::Div => op = "/",
+                Operation::Pow => op = "^",
+            }
+
+            if index == 0 {
+                print!("{} ", calc.unwrap().a);
+                print!("{} ", op);
+                print!("{} ", calc.unwrap().b);
+            } else {
+                print!("{} ", op);
+                print!("{} ", calc.unwrap().b);
+            }
+
+            if index == calculations.len() - 1 {
+                break;
+            }
+
+            index += 1;
+        }
+
+        print!("= {}", calculations.get(index).unwrap().result.unwrap());
+        println!();
         println!("Deseja realizar outra conta?");
 
         io::stdin().read_line(&mut should_continue).unwrap();
