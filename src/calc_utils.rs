@@ -1,130 +1,161 @@
-use std::io;
+use std::{io};
 
-enum Operation {
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Pow,
-}
+#[derive(Debug, Clone, Copy)]
+enum Operation { Add, Sub, Mul, Div, Pow }
+
+#[derive(Debug)]
+enum Token { Num(f32), Op(Operation) }
 
 struct Calculation {
-    op: Operation,
-    a: f32,
-    b: f32,
+    tokens: Vec<Token>,
     result: Option<f32>,
 }
 
-fn get_calculation(op: &str, a: &str, b: &str) -> Calculation {
-    let op = op.trim();
-    let a = a.trim().parse().unwrap();
-    let b = b.trim().parse().unwrap();
-    let op = match op {
-        "+" => Operation::Add,
-        "-" => Operation::Sub,
-        "*" => Operation::Mul,
-        "/" => Operation::Div,
-        "^" => Operation::Pow,
-        _ => panic!("Operação inválida"),
-    };
+fn tokenize(input: &str) -> Result<Vec<Token>, String> {
+    let mut tokens = Vec::new();
+    let mut cur_num = String::new();
 
-    Calculation {
-        op,
-        a,
-        b,
-        result: None,
+    for c in input.chars() {
+        if c.is_ascii_digit() || c == '.' || c == ',' {
+            cur_num.push(if c == ',' { '.' } else { c });
+        } 
+        
+        else if let Some(op) = get_operation(c) {
+            if cur_num.is_empty() {
+                return Err(format!("Operador '{}' sem número antes", c));
+            }
+
+            let n: f32 = cur_num.parse().map_err(|_| format!("Número inválido: {}", cur_num))?;
+            tokens.push(Token::Num(n));
+            tokens.push(Token::Op(op));
+            cur_num.clear();
+        } 
+        
+        else {
+            return Err(format!("Caractere inválido: '{}'", c));
+        }
+    }
+
+    if cur_num.is_empty() {
+        return Err("O cálculo não pode terminar com operador".to_string());
+    }
+
+    let n: f32 = cur_num.parse().map_err(|_| format!("Número inválido: {}", cur_num))?;
+    tokens.push(Token::Num(n));
+
+    Ok(tokens)
+}
+
+fn precedence(op: Operation) -> u8 {
+    match op {
+        Operation::Add | Operation::Sub => 1,
+        Operation::Mul | Operation::Div => 2,
+        Operation::Pow => 3,
     }
 }
 
-fn calculate(calc: &Calculation) -> f32 {
-    match calc.op {
-        Operation::Add => calc.a + calc.b,
-        Operation::Sub => calc.a - calc.b,
-        Operation::Mul => calc.a * calc.b,
-        Operation::Div => calc.a / calc.b,
-        Operation::Pow => calc.a.powf(calc.b),
+fn apply(op: Operation, a: f32, b: f32) -> f32 {
+    match op {
+        Operation::Add => a + b,
+        Operation::Sub => a - b,
+        Operation::Mul => a * b,
+        Operation::Div => a / b,
+        Operation::Pow => a.powf(b),
+    }
+}
+
+fn evaluate(tokens: &[Token]) -> f32 {
+    let mut nums: Vec<f32> = Vec::new();
+    let mut ops: Vec<Operation> = Vec::new();
+
+    for token in tokens {
+        match token {
+            Token::Num(n) => nums.push(*n),
+            Token::Op(op) => {
+                // Resolve operações pendentes que têm prioridade maior ou igual.
+                // (^ é associativo à direita: 2^3^2 = 2^9, por isso não resolve no "igual")
+                
+                while let Some(&top) = ops.last() {
+                    let resolve = precedence(top) > precedence(*op)
+                        || (precedence(top) == precedence(*op) && !matches!(op, Operation::Pow));
+                    if !resolve { break; }
+                    ops.pop();
+                    let b = nums.pop().unwrap();
+                    let a = nums.pop().unwrap();
+                    nums.push(apply(top, a, b));
+                }
+                ops.push(*op);
+            }
+        }
+    }
+
+    // Resolve o que sobrou
+    while let Some(op) = ops.pop() {
+        let b = nums.pop().unwrap();
+        let a = nums.pop().unwrap();
+        nums.push(apply(op, a, b));
+    }
+    nums[0]
+}
+
+fn get_operation(c: char) -> Option<Operation> {
+    match c {
+        '+' => Some(Operation::Add),
+        '-' => Some(Operation::Sub),
+        '*' => Some(Operation::Mul),
+        '/' => Some(Operation::Div),
+        '^' => Some(Operation::Pow),
+        _ => None,
+    }
+}
+
+fn filter_input(input: &str) -> String {
+    let input = input.trim();
+    let input: String = input.replace(" ", "");
+    input
+}
+
+fn mostrar_historico(calculations: Vec<Calculation>){
+    println!("Histórico:");
+    for (i, calc) in calculations.iter().enumerate() {
+        println!("{}: {:?} = {:?}", i + 1, calc.tokens, calc.result);
     }
 }
 
 pub fn init() {
-    let mut result: f32 = 0.0;
     let mut should_continue = String::new();
     let mut calculations: Vec<Calculation> = Vec::new();
     println!("Calculadora iniciou!");
 
     loop {
-        let mut a = String::new();
-        let mut b = String::new();
-        let mut op = String::new();
-        let mut calc: Calculation;
-        println!("Informe a operação (+, -, *, /):");
-        io::stdin().read_line(&mut op).unwrap();
+        let mut input = String::new();
 
-        if should_continue.trim() == "s" {
-            println!("Informe o número:");
-            io::stdin().read_line(&mut a).unwrap();
+        println!("Informe o calculo, utilize essas operações (+, -, *, /):");
+        io::stdin().read_line(&mut input).unwrap();
 
-            calc = get_calculation(&op, &result.to_string(), &a);
-            result = calculate(&calc);
-            calc.result = Some(result);
-            calculations.push(calc);
-        } else {
-            println!("Informe o primeiro número:");
-            io::stdin().read_line(&mut a).unwrap();
+        let input = filter_input(&input);
+        println!("Filtro: {}", input);
 
-            println!("Informe o segundo número:");
-            io::stdin().read_line(&mut b).unwrap();
-
-            calc = get_calculation(&op, &a, &b);
-            result = calculate(&calc);
-            calc.result = Some(result);
-            calculations.push(calc);
+        match tokenize(&input) {
+            Ok(tokens) => {
+                let result = evaluate(&tokens);
+                println!("= {}", result);
+                
+                calculations.push(Calculation {
+                    tokens,
+                    result: Some(result),
+                });
+            },
+            Err(e) => println!("Erro: {}", e),
         }
 
-        should_continue = String::new();
-
-        println!("Calculo Atual: ");
-        let mut index = 0;
-        loop {
-            let calc: Option<&Calculation> = calculations.get(index);
-            let op: &str;
-
-            if calc.is_none() {
-                break;
-            }
-
-            match calc.unwrap().op {
-                Operation::Add => op = "+",
-                Operation::Sub => op = "-",
-                Operation::Mul => op = "*",
-                Operation::Div => op = "/",
-                Operation::Pow => op = "^",
-            }
-
-            if index == 0 {
-                print!("{} ", calc.unwrap().a);
-                print!("{} ", op);
-                print!("{} ", calc.unwrap().b);
-            } else {
-                print!("{} ", op);
-                print!("{} ", calc.unwrap().b);
-            }
-
-            if index == calculations.len() - 1 {
-                break;
-            }
-
-            index += 1;
-        }
-
-        print!("= {}", calculations.get(index).unwrap().result.unwrap());
-        println!();
-        println!("Deseja realizar outra conta?");
-
+        println!("Continuar?");
         io::stdin().read_line(&mut should_continue).unwrap();
 
         if should_continue.trim() != "s" {
             break;
         }
     }
+
+    mostrar_historico(calculations);
 }
